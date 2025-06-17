@@ -98,6 +98,16 @@ class MqttHelper {
   ) =>
       _connectionStream.stream.listen(change);
 
+  /// The number of times the MQTT helper has attempted to reconnect to the MQTT broker.
+  ///
+  /// This value is used to track the number of times the MQTT helper has attempted to reconnect to the MQTT broker.
+  int _autoReconnectRetry = 0;
+
+  /// The maximum number of times to retry auto-reconnect.
+  ///
+  /// This value is used to limit the number of times the MQTT helper will attempt to reconnect to the MQTT broker.
+  final int _maxAutoReconnectRetry = 3;
+
   /// Initializes the MQTT helper with the provided configuration.
   ///
   /// This method sets up the underlying MQTT client and configures it with the provided configuration. It also sets up the streams for listening to events and connection changes.
@@ -112,7 +122,6 @@ class MqttHelper {
     MqttConfig config, {
     MqttCallbacks? callbacks,
     bool autoSubscribe = false,
-
     List<String>? topics,
     void Function(List<String>)? subscribedTopicsCallback,
     void Function(List<String>)? unSubscribedTopicsCallback,
@@ -134,7 +143,7 @@ class MqttHelper {
     _callbacks = callbacks;
     _topics = topics ?? [];
     _autoSubscribe = autoSubscribe;
-   
+
     _subscribedTopicsCallback = subscribedTopicsCallback;
     _unSubscribedTopicsCallback = unSubscribedTopicsCallback;
     await _initializeClient();
@@ -164,11 +173,14 @@ class MqttHelper {
     _client?.onUnsubscribed = _onUnSubscribed;
     _client?.onSubscribeFail = _onSubscribeFailed;
     _client?.logging(on: _config.enableLogging);
-    _client?.autoReconnect =  _config.autoReconnect;
+    _client?.autoReconnect = _config.autoReconnect;
     _client?.pongCallback = _pong;
     _client?.setProtocolV311();
     _client?.websocketProtocols =
         _config.webSocketConfig?.websocketProtocols ?? [];
+    _client?.resubscribeOnAutoReconnect = _config.autoReconnect;
+    _client?.onAutoReconnect = _onAutoReconnect;
+    _client?.onAutoReconnected = _onAutoReconnected;
 
     /// Add the successful connection callback
     _client?.onConnected = _onConnected;
@@ -373,5 +385,21 @@ class MqttHelper {
       builder.payload!,
       retain: retain,
     );
+  }
+
+  /// This function is called when the MQTT client attempts to reconnect to the MQTT broker.
+  void _onAutoReconnect() {
+    log('[MQTTHelper] - MQTT AutoReconnecting');
+  }
+
+  /// This function is called when the MQTT client successfully reconnects to the MQTT broker.
+  void _onAutoReconnected() async {
+    log('[MQTTHelper] - MQTT AutoReconnected');
+    disconnect();
+    if (_autoReconnectRetry <= _maxAutoReconnectRetry) {
+      await Future.delayed(Duration(seconds: 2));
+      _connectClient();
+      _autoReconnectRetry++;
+    }
   }
 }
