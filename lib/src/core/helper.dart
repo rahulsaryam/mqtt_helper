@@ -146,7 +146,7 @@ class MqttHelper {
 
     _subscribedTopicsCallback = subscribedTopicsCallback;
     _unSubscribedTopicsCallback = unSubscribedTopicsCallback;
-    _autoReconnectRetry = config.maxAutoReconnectRetry;
+    _maxAutoReconnectRetry = config.maxAutoReconnectRetry;
     await _initializeClient();
     await _connectClient();
   }
