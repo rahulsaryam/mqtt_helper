@@ -106,7 +106,7 @@ class MqttHelper {
   /// The maximum number of times to retry auto-reconnect.
   ///
   /// This value is used to limit the number of times the MQTT helper will attempt to reconnect to the MQTT broker.
-  final int _maxAutoReconnectRetry = 3;
+  late int _maxAutoReconnectRetry;
 
   /// Initializes the MQTT helper with the provided configuration.
   ///
@@ -146,6 +146,7 @@ class MqttHelper {
 
     _subscribedTopicsCallback = subscribedTopicsCallback;
     _unSubscribedTopicsCallback = unSubscribedTopicsCallback;
+    _autoReconnectRetry = config.maxAutoReconnectRetry;
     await _initializeClient();
     await _connectClient();
   }

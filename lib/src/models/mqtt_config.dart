@@ -19,8 +19,11 @@ class MqttConfig {
   /// Whether to use a secure connection, default is `false`.
   final bool secure;
 
-/// Whether to use a autoreconnect connection, default is `true`.
-  final bool autoReconnect; 
+  /// Whether to use a autoreconnect connection, default is `true`.
+  final bool autoReconnect;
+
+  /// The maximum number of times to retry automatic reconnection if the connection is lost. Default is `3`.
+  final int maxAutoReconnectRetry;
 
   /// Creates a new `MqttConfig` instance with the given configurations and settings.
   MqttConfig({
@@ -30,6 +33,7 @@ class MqttConfig {
     this.enableLogging = true,
     this.secure = false,
     this.autoReconnect = true,
+    this.maxAutoReconnectRetry = 3,
   });
 
   /// Creates a copy of the current `MqttConfig` instance with optional changes.
@@ -40,6 +44,7 @@ class MqttConfig {
     bool? enableLogging,
     bool? secure,
     bool? autoReconnect,
+    int? maxAutoReconnectRetry,
   }) {
     return MqttConfig(
       serverConfig: serverConfig ?? this.serverConfig,
@@ -48,6 +53,8 @@ class MqttConfig {
       enableLogging: enableLogging ?? this.enableLogging,
       secure: secure ?? this.secure,
       autoReconnect: autoReconnect ?? this.autoReconnect,
+      maxAutoReconnectRetry:
+          maxAutoReconnectRetry ?? this.maxAutoReconnectRetry,
     );
   }
 
@@ -60,6 +67,7 @@ class MqttConfig {
       'enableLogging': enableLogging,
       'secure': secure,
       'autoReconnect': autoReconnect,
+      'maxAutoReconnectRetry': maxAutoReconnectRetry,
     };
   }
 
@@ -80,6 +88,7 @@ class MqttConfig {
       enableLogging: map['enableLogging'] as bool,
       secure: map['secure'] as bool,
       autoReconnect: map['autoReconnect'] as bool,
+      maxAutoReconnectRetry: map['maxAutoReconnectRetry'] as int,
     );
   }
 
@@ -94,7 +103,7 @@ class MqttConfig {
   /// Returns a string representation of the `MqttConfig` instance.
   @override
   String toString() {
-    return 'MqttConfig(serverConfig: $serverConfig, projectConfig: $projectConfig, webSocketConfig: $webSocketConfig, enableLogging: $enableLogging, secure: $secure, autoReconnect: $autoReconnect)';
+    return 'MqttConfig(serverConfig: $serverConfig, projectConfig: $projectConfig, webSocketConfig: $webSocketConfig, enableLogging: $enableLogging, secure: $secure, autoReconnect: $autoReconnect, maxAutoReconnectRetry: $maxAutoReconnectRetry)';
   }
 
   /// Compares two `MqttConfig` instances for equality.
@@ -107,6 +116,7 @@ class MqttConfig {
         other.webSocketConfig == webSocketConfig &&
         other.enableLogging == enableLogging &&
         other.autoReconnect == autoReconnect &&
+        other.maxAutoReconnectRetry == maxAutoReconnectRetry &&
         other.secure == secure;
   }
 
@@ -118,6 +128,7 @@ class MqttConfig {
         webSocketConfig.hashCode ^
         enableLogging.hashCode ^
         autoReconnect.hashCode ^
+        maxAutoReconnectRetry.hashCode ^
         secure.hashCode;
   }
 }
