@@ -396,8 +396,8 @@ class MqttHelper {
   /// This function is called when the MQTT client successfully reconnects to the MQTT broker.
   void _onAutoReconnected() async {
     log('[MQTTHelper] - MQTT AutoReconnected');
-    disconnect();
     if (_autoReconnectRetry <= _maxAutoReconnectRetry) {
+      disconnect();
       await Future.delayed(Duration(seconds: 2));
       _connectClient();
       _autoReconnectRetry++;
